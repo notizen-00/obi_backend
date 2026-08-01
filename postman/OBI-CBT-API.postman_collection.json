@@ -1,0 +1,661 @@
+{
+  "info": {
+    "_postman_id": "b7a13af8-55ce-4f87-9e5e-0b1cb7a91c00",
+    "name": "OBI CBT API",
+    "description": "Collection untuk menguji API CBT OBI. Jalankan folder secara berurutan. Request Submit Exam akan menyelesaikan ujian secara permanen untuk peserta dan ujian terpilih.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "let baseUrl = String(pm.variables.get('base_url') || 'obi-archive.test').trim();",
+          "if (!/^https?:\\/\\//i.test(baseUrl)) {",
+          "  baseUrl = 'http://' + baseUrl;",
+          "}",
+          "baseUrl = baseUrl.replace(/\\/+$/, '');",
+          "if (!/\\/api\\.php$/i.test(baseUrl)) {",
+          "  baseUrl += /\\/_$/i.test(baseUrl) ? '/api.php' : '/_/api.php';",
+          "}",
+          "pm.variables.set('base_url', baseUrl);",
+          "console.log('CBT API Base URL:', baseUrl);"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Public",
+      "item": [
+        {
+          "name": "List Active Exams",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}?action=exams",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "exams"
+                }
+              ]
+            },
+            "description": "Daftar Ujian Utama dan Tryout yang aktif. Test script memilih ujian default yang siap, atau ujian siap pertama, sebagai exam_type_id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Respons sukses', () => pm.expect(json.success).to.eql(true));",
+                  "pm.test('Data berupa array', () => pm.expect(json.data).to.be.an('array'));",
+                  "const selected = json.data.find(exam => exam.is_default && exam.is_ready) || json.data.find(exam => exam.is_ready) || json.data[0];",
+                  "if (selected) {",
+                  "  pm.environment.set('exam_type_id', String(selected.id));",
+                  "  pm.environment.set('exam_name', selected.name);",
+                  "  pm.environment.set('exam_kind', selected.kind);",
+                  "  console.log(`Ujian dipilih: ${selected.name} (ID ${selected.id})`);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check Username by NIK",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nik\": \"{{nik}}\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}?action=check_username",
+              "host": ["{{base_url}}"],
+              "query": [{"key": "action", "value": "check_username"}]
+            },
+            "description": "Mencari username akun ujian aktif berdasarkan NIK 16 digit."
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nik\": \"{{nik}}\",\n  \"username\": \"{{username}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"password-baru\",\n  \"confirm_password\": \"password-baru\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}?action=forgot_password",
+              "host": ["{{base_url}}"],
+              "query": [{"key": "action", "value": "forgot_password"}]
+            },
+            "description": "Mengganti password setelah NIK, username, dan email cocok. Seluruh bearer token lama akan dicabut."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Login - Bearer Token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}?action=token_login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "token_login"
+                }
+              ]
+            },
+            "description": "Login peserta dan menghasilkan bearer token. Token otomatis disimpan ke environment."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Login berhasil', () => pm.expect(json.success).to.eql(true));",
+                  "pm.test('Access token tersedia', () => pm.expect(json.data.access_token).to.be.a('string').and.not.empty);",
+                  "pm.expect(json.data.token_type).to.eql('Bearer');",
+                  "pm.environment.set('access_token', json.data.access_token);",
+                  "pm.environment.set('token_expires_at', json.data.expires_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Current User & Attempts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}?action=me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "me"
+                }
+              ]
+            },
+            "description": "Profil peserta terautentikasi dan semua attempt miliknya."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Profil tersedia', () => pm.expect(json.data.user).to.be.an('object'));",
+                  "pm.test('Attempts berupa array', () => pm.expect(json.data.attempts).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Exam Flow",
+      "description": "Urutan normal: Start Exam, Load Exam, Save Answers, lalu Submit Exam. Submit bersifat final.",
+      "item": [
+        {
+          "name": "Start Exam",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exam_type_id\": {{exam_type_id}},\n  \"exam_kind\": \"{{exam_kind}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}?action=start",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "start"
+                }
+              ]
+            },
+            "description": "Memulai timer ujian. Gagal dengan HTTP 409 bila bank soal belum lengkap atau ujian sudah selesai."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Ujian berhasil dimulai', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Status in_progress', () => pm.expect(json.data.status).to.eql('in_progress'));",
+                  "pm.environment.set('exam_ends_at', json.data.ends_at);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Load Exam Questions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}?action=exam&exam_type_id={{exam_type_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "exam"
+                },
+                {
+                  "key": "exam_type_id",
+                  "value": "{{exam_type_id}}"
+                }
+              ]
+            },
+            "description": "Mengambil soal, jawaban tersimpan, dan waktu selesai. Respons tidak mengandung correct_option."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Questions berupa array', () => pm.expect(json.data.questions).to.be.an('array'));",
+                  "pm.test('Kunci jawaban tidak bocor', () => {",
+                  "  json.data.questions.forEach(question => pm.expect(question).not.to.have.property('correct_option'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Save Answers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exam_type_id\": {{exam_type_id}},\n  \"answers\": {\n    \"1\": \"A\",\n    \"2\": \"C\",\n    \"3\": \"B\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}?action=save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "save"
+                }
+              ]
+            },
+            "description": "Autosave seluruh jawaban terbaru. Ubah contoh jawaban sesuai kebutuhan."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Jawaban tersimpan', () => pm.expect(json.success).to.eql(true));",
+                  "pm.test('Jumlah terjawab tersedia', () => pm.expect(json.data.answered).to.be.a('number'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit Exam - FINAL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exam_type_id\": {{exam_type_id}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}?action=submit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "submit"
+                }
+              ]
+            },
+            "description": "PERINGATAN: menyelesaikan ujian secara permanen. Request dilewati kecuali variabel confirm_submit diubah menjadi YES."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('confirm_submit') !== 'YES') {",
+                  "  console.warn('Submit dilewati. Atur confirm_submit=YES bila benar-benar ingin menyelesaikan ujian.');",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Submit berhasil', () => pm.expect(json.success).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Survey",
+      "description": "Survey hanya dapat diakses setelah attempt selesai dan hanya dapat dikirim satu kali.",
+      "item": [
+        {
+          "name": "Get Survey Status & Fields",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}?action=survey&exam_type_id={{exam_type_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "survey"
+                },
+                {
+                  "key": "exam_type_id",
+                  "value": "{{exam_type_id}}"
+                }
+              ]
+            },
+            "description": "Mengambil eligibility, status pengiriman, jawaban yang sudah tersimpan, dan konfigurasi field survey."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Konfigurasi survey tersedia', () => pm.expect(json.data.fields).to.be.an('object'));",
+                  "pm.environment.set('survey_eligible', String(json.data.eligible));",
+                  "pm.environment.set('survey_submitted', String(json.data.submitted));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit Survey - ONE TIME",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exam_type_id\": {{exam_type_id}},\n  \"rating\": 5,\n  \"kesan\": \"Pelaksanaan ujian berjalan baik.\",\n  \"saran\": \"Pertahankan kualitas sistem.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}?action=survey",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "survey"
+                }
+              ]
+            },
+            "description": "PERINGATAN: survey hanya dapat dikirim sekali. Request dilewati kecuali confirm_survey=YES."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('confirm_survey') !== 'YES') {",
+                  "  console.warn('Survey dilewati. Atur confirm_survey=YES bila benar-benar ingin mengirim survey.');",
+                  "  pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Survey tersimpan', () => pm.expect(json.success).to.eql(true));",
+                  "pm.environment.set('survey_submitted', 'true');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Logout",
+      "item": [
+        {
+          "name": "Logout & Revoke Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}?action=logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "key": "action",
+                  "value": "logout"
+                }
+              ]
+            },
+            "description": "Mencabut bearer token aktif. Test script menghapus access_token dari environment."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Logout berhasil', () => pm.expect(json.success).to.eql(true));",
+                  "pm.environment.unset('access_token');",
+                  "pm.environment.unset('token_expires_at');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://obi-archive.test/_/api.php",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "exam_type_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "exam_kind",
+      "value": "main",
+      "type": "string"
+    },
+    {
+      "key": "confirm_submit",
+      "value": "NO",
+      "type": "string"
+    },
+    {
+      "key": "confirm_survey",
+      "value": "NO",
+      "type": "string"
+    }
+  ]
+}

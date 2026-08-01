@@ -1,0 +1,39 @@
+[
+    {
+        "id": "REG-6A265236E9F18",
+        "timestamp": "2026-06-08 12:25:10",
+        "nama": "Alviona Anjani",
+        "nik": "1234567891234567",
+        "tempat_lahir": "Banyuwangi",
+        "tgl_lahir": "2016-02-09",
+        "nama_sekolah": "SMA Negeri 1 Pesanggaran",
+        "alamat_sekolah": "Jalan Raya Pesanggaran No. 112 Kec. Pesanggaran Kab. Banyuwangi",
+        "alamat_rumah": "Jalan Raya No. 12 Pesanggaran",
+        "email": "emailkuini@gmail.com",
+        "no_hp": "0815555555555",
+        "foto_profil": "foto_6a265236e9e21.jpg",
+        "surat_izin": "izin_6a265236e9e6f.pdf",
+        "bukti_bayar": "bayar_6a265236e9eac.pdf"
+    },
+    {
+        "id": "REG-6A2665DEDAB1D",
+        "timestamp": "2026-06-08 13:49:02",
+        "nama": "Ananda Tomas",
+        "nik": "1234567890123456",
+        "tempat_lahir": "Jember",
+        "tgl_lahir": "2026-06-02",
+        "nama_sekolah": "SMA 1 Jember",
+        "alamat_sekolah": "Jalan Raya Jember No. 1",
+        "alamat_rumah": "Jalan Raya No. 2",
+        "email": "emailuadalaha@gmail.com",
+        "no_hp": "081444444444444",
+        "jenis_pembayaran": "Individu",
+        "foto_profil": "foto_6a2665deda70d.jpg",
+        "bukti_bayar": "bayar_6a2665dedaa6a.pdf",
+        "identitas_type": "kartu_pelajar",
+        "identitas_file": "kartu_6a2665dedaa90.png",
+        "status_bayar": "lunas",
+        "verified_at": "2026-06-08 17:54:02",
+        "verified_by": "admin"
+    }
+]

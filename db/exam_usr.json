@@ -1,0 +1,13 @@
+[
+    {
+        "id": "EXAM-6A266F02EDC32",
+        "reg_id": "REG-6A2665DEDAB1D",
+        "nama": "Ananda Tomas",
+        "email": "emailuadalaha@gmail.com",
+        "nik": "1234567890123456",
+        "username": "tomas2026obi",
+        "password_hash": "$2y$12$4tPki.sSrG96JKwvru8cOeFXm8q7v1SRXodnoNB.rBulXGsMMSTye",
+        "created_at": "2026-06-08 14:28:02",
+        "status": "active"
+    }
+]
