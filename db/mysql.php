@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 date_default_timezone_set('Asia/Jakarta');
 
-const DB_HOST = 'localhost';
-#const DB_NAME = 'obibase';
-#const DB_USER = 'obirunner';
-#const DB_PASS = '.(UX-7]L638wR=D,E+;PFwO/a';
-const DB_NAME = 'obibase';
-const DB_USER = 'root';
-const DB_PASS = '';
+// Nilai default mempertahankan kompatibilitas dengan Laragon. Di Docker,
+// seluruh nilai ini diisi melalui environment pada compose.yaml.
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'obibase');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
 
 function db(): PDO
 {
@@ -19,7 +19,7 @@ function db(): PDO
         return $pdo;
     }
 
-    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+    $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4';
     $pdo = new PDO($dsn, DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
