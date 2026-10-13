@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../db/exam.php';
 
-// const CBT_ALLOWED_ORIGIN = 'https://exam.obi.apps.unej.ac.id';
-const CBT_ALLOWED_ORIGIN = "http://localhost:5173";
+function cbt_allowed_origins(): array
+{
+    $configured = getenv('CBT_ALLOWED_ORIGINS');
+    $origins = $configured === false || trim($configured) === ''
+        ? ['http://localhost:5173']
+        : array_map('trim', explode(',', $configured));
+
+    return array_values(array_filter($origins, static fn (string $origin): bool => $origin !== ''));
+}
 
 function api_response(array $payload, int $status = 200): never
 {
@@ -22,11 +29,11 @@ function api_allow_cors(): void
         return;
     }
 
-    if (!hash_equals(CBT_ALLOWED_ORIGIN, $origin)) {
+    if (!in_array($origin, cbt_allowed_origins(), true)) {
         api_response(['success' => false, 'error' => 'Origin frontend tidak diizinkan.'], 403);
     }
 
-    header('Access-Control-Allow-Origin: ' . CBT_ALLOWED_ORIGIN);
+    header('Access-Control-Allow-Origin: ' . $origin);
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');

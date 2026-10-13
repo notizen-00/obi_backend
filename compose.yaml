@@ -29,6 +29,7 @@ services:
       DB_NAME: ${DB_NAME:-obibase}
       DB_USER: ${DB_USER:-obi}
       DB_PASS: ${DB_PASSWORD:-obi_secret}
+      CBT_ALLOWED_ORIGINS: ${CBT_ALLOWED_ORIGINS:-http://localhost:3000}
       TZ: Asia/Jakarta
     volumes:
       - ./:/var/www/html
@@ -66,6 +67,37 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ../obi-fe
+      dockerfile: Dockerfile
+    image: obi-cbt-frontend:latest
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      PUBLIC_CBT_API_BASE_URL: ${PUBLIC_CBT_API_BASE_URL:-http://localhost:${APP_PORT:-8080}/_/api.php}
+      ORIGIN: ${ORIGIN:-http://localhost:3000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      nginx:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   mariadb_data:
