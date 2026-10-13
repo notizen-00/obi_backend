@@ -34,6 +34,9 @@ docker compose logs -f frontend nginx php database migrate phpmyadmin
 # Menjalankan ulang migrasi setelah perubahan schema
 docker compose run --rm migrate
 
+# Membuat tiga peserta dan akun ujian uji (test1, test2, test3)
+docker compose exec php php db/seed_test_users.php
+
 # Menghentikan container tanpa menghapus data
 docker compose down
 ```
@@ -44,3 +47,10 @@ menghapus seluruh data MariaDB di volume Docker.
 
 Pada Linux, bila upload gagal karena permission, berikan akses tulis ke user
 PHP-FPM pada folder `uploads` (UID 82 pada image Alpine).
+
+Seed akun uji menggunakan nama `test` dan password default `Test123!`.
+Untuk mengganti password saat seed:
+
+```bash
+docker compose exec -e SEED_TEST_PASSWORD='password-baru' php php db/seed_test_users.php
+```
