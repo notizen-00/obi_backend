@@ -9,8 +9,11 @@ Kebutuhan: Docker Desktop atau Docker Engine dengan Docker Compose v2.
    docker compose up -d --build
    ```
 
-3. Buka `http://localhost:3000`. Frontend menggunakan API di `http://localhost:8080/_/api.php`.
-   Port frontend dan backend dapat diubah lewat `FRONTEND_PORT` dan `APP_PORT`.
+3. Buka frontend di `http://localhost:3000` dan phpMyAdmin di
+   `http://localhost:8081`. Frontend menggunakan API di
+   `http://localhost:8080/_/api.php`. Port frontend, backend, dan phpMyAdmin
+   dapat diubah lewat `FRONTEND_PORT`, `APP_PORT`, dan `PHPMYADMIN_PORT`.
+   Login phpMyAdmin menggunakan nilai `DB_USER` dan `DB_PASSWORD` dari `.env`.
 
 Untuk domain deployment, sesuaikan `ORIGIN`, `PUBLIC_CBT_API_BASE_URL`, dan
 `CBT_ALLOWED_ORIGINS` di `.env`. Nilai `CBT_ALLOWED_ORIGINS` dapat memuat
@@ -26,7 +29,7 @@ dengan status sukses. Ini normal. Data MariaDB disimpan dalam named volume
 ```bash
 # Melihat status dan log
 docker compose ps
-docker compose logs -f frontend nginx php database migrate
+docker compose logs -f frontend nginx php database migrate phpmyadmin
 
 # Menjalankan ulang migrasi setelah perubahan schema
 docker compose run --rm migrate

@@ -18,6 +18,19 @@ services:
       retries: 20
       start_period: 10s
 
+  phpmyadmin:
+    image: phpmyadmin:5-apache
+    restart: unless-stopped
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
+    depends_on:
+      database:
+        condition: service_healthy
+
   php:
     build:
       context: .
