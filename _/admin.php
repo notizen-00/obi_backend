@@ -1,8 +1,10 @@
 <?php
 session_start();
 require_once __DIR__ . '/../db/exam.php';
+require_once __DIR__ . '/../db/operators.php';
 
 ensure_exam_tables();
+ensure_operators_table();
 
 function promote_default_exam_type(int $excluded_id = 0): bool
 {

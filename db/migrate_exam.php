@@ -7,6 +7,8 @@ if (PHP_SAPI !== 'cli') {
 }
 
 require_once __DIR__ . '/exam.php';
+require_once __DIR__ . '/operators.php';
 
 ensure_exam_tables();
-fwrite(STDOUT, "Migrasi schema ujian selesai.\n");
+$seededOperators = migrate_operators();
+fwrite(STDOUT, "Migrasi schema ujian selesai. Seed operator baru: $seededOperators.\n");

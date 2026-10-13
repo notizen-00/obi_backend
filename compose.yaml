@@ -42,7 +42,7 @@ services:
       DB_NAME: ${DB_NAME:-obibase}
       DB_USER: ${DB_USER:-obi}
       DB_PASS: ${DB_PASSWORD:-obi_secret}
-      CBT_ALLOWED_ORIGINS: ${CBT_ALLOWED_ORIGINS:-http://localhost:3000}
+      CBT_ALLOWED_ORIGINS: ${CBT_ALLOWED_ORIGINS:-https://exam.sewantara.id}
       TZ: Asia/Jakarta
     volumes:
       - ./:/var/www/html
@@ -92,8 +92,8 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
-      PUBLIC_CBT_API_BASE_URL: ${PUBLIC_CBT_API_BASE_URL:-http://localhost:${APP_PORT:-8080}/_/api.php}
-      ORIGIN: ${ORIGIN:-http://localhost:3000}
+      PUBLIC_CBT_API_BASE_URL: ${PUBLIC_CBT_API_BASE_URL:-https://obi.sewantara.id/_/api.php}
+      ORIGIN: ${ORIGIN:-https://exam.sewantara.id}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     depends_on:

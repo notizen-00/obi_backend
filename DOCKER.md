@@ -9,10 +9,12 @@ Kebutuhan: Docker Desktop atau Docker Engine dengan Docker Compose v2.
    docker compose up -d --build
    ```
 
-3. Buka frontend di `http://localhost:3000` dan phpMyAdmin di
-   `http://localhost:8081`. Frontend menggunakan API di
-   `http://localhost:8080/_/api.php`. Port frontend, backend, dan phpMyAdmin
-   dapat diubah lewat `FRONTEND_PORT`, `APP_PORT`, dan `PHPMYADMIN_PORT`.
+3. Frontend disajikan di port `3000`, backend API di port `8080`, dan
+   phpMyAdmin di `http://localhost:8081`. Dengan domain production yang
+   tercantum di `.env.example`, frontend dibuka di `https://exam.sewantara.id`
+   dan menggunakan API `https://obi.sewantara.id/_/api.php`. Port frontend,
+   backend, dan phpMyAdmin dapat diubah lewat `FRONTEND_PORT`, `APP_PORT`, dan
+   `PHPMYADMIN_PORT`.
    Login phpMyAdmin menggunakan nilai `DB_USER` dan `DB_PASSWORD` dari `.env`.
 
 Untuk domain deployment, sesuaikan `ORIGIN`, `PUBLIC_CBT_API_BASE_URL`, dan
@@ -31,7 +33,7 @@ dengan status sukses. Ini normal. Data MariaDB disimpan dalam named volume
 docker compose ps
 docker compose logs -f frontend nginx php database migrate phpmyadmin
 
-# Menjalankan ulang migrasi setelah perubahan schema
+# Menjalankan migrasi schema dan seed operator dari db/operators.json
 docker compose run --rm migrate
 
 # Membuat tiga peserta dan akun ujian uji (test1, test2, test3)
@@ -54,3 +56,6 @@ Untuk mengganti password saat seed:
 ```bash
 docker compose exec -e SEED_TEST_PASSWORD='password-baru' php php db/seed_test_users.php
 ```
+
+Migrasi membuat tabel `operators` dan memasukkan akun dari
+`db/operators.json`. Akun dengan username yang sudah ada tidak ditimpa.
