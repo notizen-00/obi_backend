@@ -43,6 +43,7 @@ services:
       DB_USER: ${DB_USER:-obi}
       DB_PASS: ${DB_PASSWORD:-obi_secret}
       CBT_ALLOWED_ORIGINS: ${CBT_ALLOWED_ORIGINS:-https://exam.sewantara.id}
+      CBT_TRUST_PROXY_HTTPS: ${CBT_TRUST_PROXY_HTTPS:-0}
       TZ: Asia/Jakarta
     volumes:
       - ./:/var/www/html
